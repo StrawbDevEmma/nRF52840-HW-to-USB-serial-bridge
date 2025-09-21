@@ -1,5 +1,5 @@
 //USB to Hardware Serial Bridge for nRF52840 based boards by StrawbEmi
-#define VERSION "0.1.4" //LOL why does this basic ass program need a versioning system? Because I said so, that's why. :D
+#define VERSION "0.1.5" //LOL why does this basic ass program need a versioning system? Because I said so, that's why. :D
 
 #include <Arduino.h>
 #include <Adafruit_TinyUSB.h>
@@ -7,6 +7,8 @@
 //Define desired HW serial port here
 //Options depending on board
 #define HWSERIAL Serial1
+
+unsigned long lastUpdate = 0;
 
 void setup() {
   //set the pinmodes for the on-board LEDs
@@ -39,10 +41,19 @@ void setup() {
 }
 
 void loop() {
-  //set the LEDs to show we're alive
-  digitalWrite(LED_RED, LOW);
+  //blink red LED every second to show the program is running
+  if (millis() - lastUpdate > 1000) { //if it's been over 1 second, turn the LED on
+    digitalWrite(LED_RED, LOW);
+  }
+  if (millis() - lastUpdate > 2000) { //if it's been 2 seconds, reset the timer and turn the LED back off
+    lastUpdate = millis();
+    digitalWrite(LED_RED, HIGH);
+  }
+
+  //set the activity LEDs off
   digitalWrite(LED_GREEN, HIGH);
   digitalWrite(LED_BLUE, HIGH);
+
   int incomingByte;
   if (Serial.available() > 0) {
     digitalWrite(LED_GREEN, LOW); //blink green LED when USB serial data received
