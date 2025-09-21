@@ -1,5 +1,5 @@
 //USB to Hardware Serial Bridge for nRF52840 based boards by StrawbEmi
-#define VERSION "0.2.0" //LOL why does this basic ass program need a versioning system? Because I said so, that's why. :D
+#define VERSION "0.2.0" //LOL why does this basic ass program need a versioning system? Because I said so, that's why. :3
 
 #define MANUFACTURER "Seeed Studio"
 #define MODEL "Seeed Xiao nRF52840"
@@ -54,12 +54,12 @@ void setup() {
   }
   //if USB serial initialized successfully, print success message
   if(Serial) { 
-    Serial.println("nRF: If you can see this then USB serial initialized successfully! :)");
+    Serial.println("nRF: If you can see this then USB serial initialized successfully! :3");
   }
   //while(!HWSERIAL) delay(10); //wait for HW serial to initialize
 
   //Print a start message with version number
-  Serial.println("nRF: USB Serial to Hardware Serial Bridge - Version: ");
+  Serial.print("nRF: USB Serial to Hardware Serial Bridge - Version: ");
   Serial.println(VERSION);
   Serial.print("nRF: Starting");
   delay(500);
