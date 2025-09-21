@@ -1,5 +1,5 @@
 //USB to Hardware Serial Bridge for nRF52840 based boards by StrawbEmi
-#define VERSION "0.1.5" //LOL why does this basic ass program need a versioning system? Because I said so, that's why. :D
+#define VERSION "0.1.6" //LOL why does this basic ass program need a versioning system? Because I said so, that's why. :D
 
 #include <Arduino.h>
 #include <Adafruit_TinyUSB.h>
@@ -8,7 +8,9 @@
 //Options depending on board
 #define HWSERIAL Serial1
 
-unsigned long lastUpdate = 0;
+unsigned long hbMilis = 0;
+unsigned long usbActivityMilis = 0;
+unsigned long hwActivityMilis = 0;
 
 void setup() {
   //set the pinmodes for the on-board LEDs
@@ -42,27 +44,49 @@ void setup() {
 
 void loop() {
   //blink red LED every second to show the program is running
-  if (millis() - lastUpdate > 1000) { //if it's been over 1 second, turn the LED on
+  if (millis() - hbMilis > 1000) { //if it's been over 1 second, turn the LED on
     digitalWrite(LED_RED, LOW);
   }
-  if (millis() - lastUpdate > 2000) { //if it's been 2 seconds, reset the timer and turn the LED back off
-    lastUpdate = millis();
+  if (millis() - hbMilis > 2000) { //if it's been 2 seconds, reset the timer and turn the LED back off
+    hbMilis = millis();
     digitalWrite(LED_RED, HIGH);
   }
-
-  //set the activity LEDs off
-  digitalWrite(LED_GREEN, HIGH);
-  digitalWrite(LED_BLUE, HIGH);
+  
+  //keep activity LEDs on for 1ms after last activity
+  if (millis() - usbActivityMilis > 1) {
+    digitalWrite(LED_GREEN, HIGH);
+  }
+  if (millis() - hwActivityMilis > 1) {
+    digitalWrite(LED_BLUE, HIGH);
+  }
 
   int incomingByte;
+
+  //Read from USB serial and send to HW serial
   if (Serial.available() > 0) {
     digitalWrite(LED_GREEN, LOW); //blink green LED when USB serial data received
+    usbActivityMilis = millis(); //reset USB LED activity timer
     incomingByte = Serial.read();
     HWSERIAL.write(incomingByte);
   }
+
+  //Read from HW serial and send to USB serial
   if (HWSERIAL.available() > 0) {
     digitalWrite(LED_BLUE, LOW); //blink blue LED when HW serial data received  
+    hwActivityMilis = millis(); //reset HW LED activity timer
     incomingByte = HWSERIAL.read();
     Serial.write(incomingByte);
+  }
+
+
+
+  if (hbMilis > 4294967000) { //reset the heartbeat timer if it's about to overflow
+    hbMilis = 0;
+  }
+  if(hwActivityMilis > 4294967000) { //reset the HW activity timer if it's about to overflow
+    hwActivityMilis = 0;
+  }
+  if(usbActivityMilis > 4294967000) { //reset the USB activity timer if it's about to overflow
+    usbActivityMilis = 0;
   }
 }
